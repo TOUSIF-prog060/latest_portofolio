@@ -14,27 +14,64 @@ const slides = [
   ["Voice", "that", "sells"],
 ];
 
+/** Portraits the hero alternates between — each headline change flips to the next one. */
+const portraits = ["/tousif-hero.jpg", "/tousif-hero-alt.jpg"];
+
+/** Each photo's body runs off one side of the frame — feather that side so there's no hard vertical edge. */
+const feathers = [
+  "linear-gradient(90deg, rgba(0,0,0,0) 0%, #000 22%)",
+  "linear-gradient(270deg, rgba(0,0,0,0) 0%, #000 12%)",
+];
+
+/** One background wash per slide: yellow → pink → blue. White at the top keeps the nav readable. */
+const washes = [
+  "linear-gradient(180deg, #ffffff 0%, #ffffff 7%, #f6efb0 24%, #ecdb3c 48%, #c9b51d 72%, #7d7012 100%)",
+  "linear-gradient(180deg, #ffffff 0%, #ffffff 7%, #f7c6da 24%, #ee4f8c 52%, #c23d70 76%, #7e2148 100%)",
+  "linear-gradient(180deg, #ffffff 0%, #ffffff 7%, #c8d5ee 24%, #7096cf 50%, #3b65a8 76%, #1d3c78 100%)",
+];
+
 const SLIDE_MS = 4200;
 
+/** Soft-edged mask that sweeps left → right to reveal the incoming portrait. */
+const WIPE_HIDDEN = "linear-gradient(90deg, #000 -30%, rgba(0,0,0,0) 0%)";
+const WIPE_SHOWN = "linear-gradient(90deg, #000 100%, rgba(0,0,0,0) 130%)";
+
 export function Hero() {
-  const [index, setIndex] = useState(0);
+  const [state, setState] = useState({ index: 0, photo: 0 });
+  const { index, photo } = state;
   const reduce = useReducedMotion();
+
+  const goTo = (next: number) =>
+    setState((s) => (next === s.index ? s : { index: next, photo: (s.photo + 1) % portraits.length }));
 
   useEffect(() => {
     if (reduce) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % slides.length), SLIDE_MS);
+    const id = setInterval(
+      () =>
+        setState((s) => ({
+          index: (s.index + 1) % slides.length,
+          photo: (s.photo + 1) % portraits.length,
+        })),
+      SLIDE_MS,
+    );
     return () => clearInterval(id);
   }, [reduce, index]);
 
   return (
     <section
       id="top"
-      className="relative h-[100svh] min-h-[620px] overflow-hidden text-black"
-      style={{
-        background:
-          "linear-gradient(180deg, #ffffff 0%, #ffffff 7%, #f6efb0 24%, #ecdb3c 48%, #c9b51d 72%, #7d7012 100%)",
-      }}
+      className="relative isolate h-[100svh] min-h-[620px] overflow-hidden bg-white text-black"
     >
+      {/* Colour washes — stacked and cross-faded, since CSS can't animate between gradients */}
+      {washes.map((wash, i) => (
+        <div
+          key={wash}
+          aria-hidden
+          className="absolute inset-0 -z-10 transition-opacity duration-[1300ms] ease-[cubic-bezier(0.65,0,0.35,1)]"
+          style={{ background: wash, opacity: i === index ? 1 : 0 }}
+        />
+      ))}
+
       {/* Giant stacked headline — sits behind the portrait */}
       <h1
         aria-label={slides[index].join(" ")}
@@ -67,13 +104,36 @@ export function Hero() {
         transition={{ duration: 1.4, delay: 0.2, ease: EASE_OUT }}
         className="pointer-events-none absolute bottom-0 left-[58%] z-10 aspect-[1116/2000] h-[78%] -translate-x-1/2 mix-blend-multiply sm:left-1/2 sm:h-[90%]"
       >
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={photo}
+            className="absolute inset-0"
+            initial={{ maskImage: WIPE_HIDDEN, x: "-3%", zIndex: 2 }}
+            animate={{ maskImage: WIPE_SHOWN, x: "0%", zIndex: 2 }}
+            // Outgoing photo stays underneath (drifting slightly right) until the wipe has covered it
+            exit={{ zIndex: 1, x: "3%", transition: { duration: reduce ? 0 : 1.3, ease: [0.65, 0, 0.35, 1] } }}
+            transition={{ duration: reduce ? 0 : 1.3, ease: [0.65, 0, 0.35, 1] }}
+          >
+            <Image
+              src={portraits[photo]}
+              alt={`Portrait of ${site.name}`}
+              fill
+              {...(photo === 0 ? { preload: true } : { loading: "eager" as const })}
+              sizes="(min-width: 640px) 50vh, 45vh"
+              className="object-cover object-top contrast-125 grayscale"
+              style={{ WebkitMaskImage: feathers[photo], maskImage: feathers[photo] }}
+            />
+          </motion.div>
+        </AnimatePresence>
+        {/* Hidden copy of the next portrait so its wipe never waits on the network */}
         <Image
-          src="/tousif-hero.jpg"
-          alt={`Portrait of ${site.name}`}
+          src={portraits[(photo + 1) % portraits.length]}
+          alt=""
+          aria-hidden
           fill
-          preload
+          loading="eager"
           sizes="(min-width: 640px) 50vh, 45vh"
-          className="object-cover object-top contrast-125 grayscale"
+          className="invisible"
         />
       </motion.div>
 
@@ -105,7 +165,7 @@ export function Hero() {
           <button
             key={s.join(" ")}
             type="button"
-            onClick={() => setIndex(i)}
+            onClick={() => goTo(i)}
             aria-label={`Show "${s.join(" ")}"`}
             aria-current={i === index}
             className="group py-2"
