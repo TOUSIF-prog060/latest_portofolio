@@ -1,4 +1,5 @@
-import { MaskLine } from "@/components/reveal";
+import { FadeUp, MaskLine } from "@/components/reveal";
+import { ContactForm } from "@/components/contact-form";
 import { Roll } from "@/components/roll";
 import { site } from "@/lib/content";
 
@@ -28,12 +29,23 @@ export function Contact() {
         </span>
       </a>
 
-      <a
-        href={`mailto:${site.links.email}`}
-        className="underline-grow relative mt-6 inline-block text-lg text-white/80 hover:text-white sm:text-2xl"
-      >
-        {site.links.email}
-      </a>
+      <div className="relative mt-16 grid gap-14 border-t border-grey-2 pt-14 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-24">
+        <FadeUp>
+          <p className="font-display text-2xl font-medium leading-tight tracking-[-0.02em] sm:text-3xl">
+            Tell me what you want to automate. I reply to every serious inquiry within 24 hours.
+          </p>
+          <p className="type-label mt-8 text-grey-1">Or write directly</p>
+          <a
+            href={`mailto:${site.links.email}`}
+            className="underline-grow mt-3 inline-block break-all text-lg text-white/80 hover:text-white"
+          >
+            {site.links.email}
+          </a>
+        </FadeUp>
+        <FadeUp delay={0.1}>
+          <ContactForm />
+        </FadeUp>
+      </div>
 
       <div className="relative mt-24 grid gap-10 border-t border-grey-2 py-10 text-sm sm:grid-cols-3">
         <ul className="flex flex-wrap gap-x-6 gap-y-3">
