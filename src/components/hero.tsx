@@ -1,63 +1,123 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { MaskLine } from "@/components/reveal";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Roll } from "@/components/roll";
 import { site } from "@/lib/content";
 import { EASE_OUT } from "@/lib/utils";
 
-export function Hero() {
-  return (
-    <section id="top" className="relative flex min-h-[100svh] flex-col justify-between px-4 pb-8 pt-24 sm:px-8 sm:pb-10 sm:pt-28">
-      {/* Meta row */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.6 }}
-        className="type-label grid grid-cols-2 gap-4 text-grey-1 sm:grid-cols-4"
-      >
-        <span>AI Automation Engineer</span>
-        <span className="hidden sm:block">Agents · RAG · Voice AI</span>
-        <span className="hidden sm:block">{site.location}</span>
-        <span className="flex items-center justify-end gap-2 sm:justify-start">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-teal" />
-          </span>
-          Available now
-        </span>
-      </motion.div>
+/** Headline slides the hero cycles through (one per dot). */
+const slides = [
+  ["AI", "that", "works"],
+  ["Agents", "that", "act"],
+  ["Voice", "that", "sells"],
+];
 
-      {/* Giant headline */}
-      <h1 className="type-giant mt-16 text-[clamp(5rem,21vw,22rem)]">
-        <MaskLine onLoad delay={0.1}>AI that</MaskLine>
-        <MaskLine onLoad delay={0.22}>
-          works<span className="text-aurora inline-block translate-y-[0.04em] pl-[0.08em] font-normal">↘</span>
-        </MaskLine>
+const SLIDE_MS = 4200;
+
+export function Hero() {
+  const [index, setIndex] = useState(0);
+  const reduce = useReducedMotion();
+
+  useEffect(() => {
+    if (reduce) return;
+    const id = setInterval(() => setIndex((i) => (i + 1) % slides.length), SLIDE_MS);
+    return () => clearInterval(id);
+  }, [reduce, index]);
+
+  return (
+    <section
+      id="top"
+      className="relative h-[100svh] min-h-[620px] overflow-hidden text-black"
+      style={{
+        background:
+          "linear-gradient(180deg, #ffffff 0%, #ffffff 7%, #f6efb0 24%, #ecdb3c 48%, #c9b51d 72%, #7d7012 100%)",
+      }}
+    >
+      {/* Giant stacked headline — sits behind the portrait */}
+      <h1
+        aria-label={slides[index].join(" ")}
+        className="absolute left-0 top-[13%] z-0 select-none font-poster uppercase leading-[0.86] tracking-[-0.01em]"
+        style={{ fontSize: "min(37svh, 26vw)" }}
+      >
+        <AnimatePresence mode="wait" initial>
+          <motion.span key={index} className="block" aria-hidden>
+            {slides[index].map((word, i) => (
+              <span key={word + i} className="-mt-[0.12em] block overflow-hidden pt-[0.12em]">
+                <motion.span
+                  className="block will-change-transform"
+                  initial={{ y: "105%" }}
+                  animate={{ y: "0%" }}
+                  exit={{ y: "-105%" }}
+                  transition={{ duration: 0.9, delay: i * 0.08, ease: EASE_OUT }}
+                >
+                  {word}
+                </motion.span>
+              </span>
+            ))}
+          </motion.span>
+        </AnimatePresence>
       </h1>
 
-      {/* Bottom row */}
+      {/* Portrait — white backdrop multiplies away into the gradient, tinting the photo */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.4, delay: 0.2, ease: EASE_OUT }}
+        className="pointer-events-none absolute bottom-0 left-[58%] z-10 aspect-[1116/2000] h-[78%] -translate-x-1/2 mix-blend-multiply sm:left-1/2 sm:h-[90%]"
+      >
+        <Image
+          src="/tousif-hero.jpg"
+          alt={`Portrait of ${site.name}`}
+          fill
+          preload
+          sizes="(min-width: 640px) 50vh, 45vh"
+          className="object-cover object-top contrast-125 grayscale"
+        />
+      </motion.div>
+
+      {/* Intro copy — right edge */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.75, ease: EASE_OUT }}
-        className="mt-10 flex flex-col gap-8 border-t border-grey-2 pt-6 sm:flex-row sm:items-end sm:justify-between"
+        transition={{ duration: 1, delay: 0.7, ease: EASE_OUT }}
+        className="absolute bottom-24 left-4 right-4 z-20 max-w-[16rem] text-white sm:bottom-auto sm:left-auto sm:right-8 sm:top-[54%] sm:max-w-[13.5rem]"
       >
-        <p className="max-w-md text-lg leading-snug text-white/85 sm:text-xl">
-          I&apos;m <span className="text-white">{site.name}</span> — {site.bio}
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden className="mb-2">
+          <path d="M3 3 L14 14 M14 5 V14 H5" stroke="currentColor" strokeWidth="3" fill="none" />
+        </svg>
+        <p className="text-[13px] font-semibold leading-[1.25] tracking-[-0.01em]">
+          {site.name} — AI automation engineer based in {site.location}. I build agents, RAG systems and voice
+          AI that replace manual work for startups and businesses.
         </p>
-        <div className="flex items-center gap-6 text-sm font-medium">
-          <a href="#work" className="roll-trigger text-grey-1 hover:text-white">
-            <Roll>Scroll to work ↓</Roll>
-          </a>
-          <a
-            href={`mailto:${site.links.email}`}
-            className="roll-trigger inline-flex h-12 items-center rounded-full bg-white px-6 text-black transition-transform duration-300 hover:scale-[1.03]"
-          >
-            <Roll>Start a project ↗</Roll>
-          </a>
-        </div>
+        <a
+          href={`mailto:${site.links.email}`}
+          className="roll-trigger mt-4 inline-flex h-9 items-center rounded-full bg-black px-4 text-[12px] font-semibold text-white transition-transform duration-300 hover:scale-[1.04]"
+        >
+          <Roll>Start a project ↗</Roll>
+        </a>
       </motion.div>
+
+      {/* Slide indicators */}
+      <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+        {slides.map((s, i) => (
+          <button
+            key={s.join(" ")}
+            type="button"
+            onClick={() => setIndex(i)}
+            aria-label={`Show "${s.join(" ")}"`}
+            aria-current={i === index}
+            className="group py-2"
+          >
+            <span
+              className={`block h-[5px] w-8 rounded-full transition-colors duration-500 ${
+                i === index ? "bg-white" : "bg-white/40 group-hover:bg-white/70"
+              }`}
+            />
+          </button>
+        ))}
+      </div>
     </section>
   );
 }

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { FadeUp, MaskLine } from "@/components/reveal";
 import { Roll } from "@/components/roll";
 import { site, stats, timeline } from "@/lib/content";
@@ -10,23 +9,7 @@ export function About() {
         <MaskLine>About</MaskLine>
       </h2>
 
-      <div className="grid gap-14 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20">
-        <FadeUp>
-          <div className="group relative aspect-[4/5] overflow-hidden rounded-2xl border border-grey-2 bg-[#0b0b0b]">
-            <Image
-              src="/portrait.webp"
-              alt={site.name}
-              fill
-              sizes="(min-width: 1024px) 26rem, 100vw"
-              className="object-cover object-top grayscale transition-[filter] duration-700 group-hover:grayscale-0"
-            />
-            <div className="absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-black/80 to-transparent p-4 pt-16 type-label text-white/80">
-              <span>{site.name}</span>
-              <span>{site.location}</span>
-            </div>
-          </div>
-        </FadeUp>
-
+      <div className="max-w-5xl">
         <div>
           <FadeUp>
             <p className="font-display text-[clamp(1.6rem,3vw,2.6rem)] font-medium leading-[1.1] tracking-[-0.03em]">
