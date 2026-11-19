@@ -10,7 +10,8 @@ export function Services() {
           <MaskLine delay={0.08}>build</MaskLine>
         </h2>
         <p className="max-w-xs text-grey-1">
-          Six things I do end-to-end — from the first scoping call to a monitored system in production.
+          Nine things I do end-to-end — from the first scoping call to a finished system, video or site in
+          production.
         </p>
       </div>
 

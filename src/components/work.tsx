@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { PipelineWalkthrough } from "@/components/pipeline-walkthrough";
 import { MaskLine } from "@/components/reveal";
 import { Roll } from "@/components/roll";
 import { projects, type Project } from "@/lib/content";
@@ -60,46 +61,14 @@ function Slide({ project: p, index, total }: { project: Project; index: number; 
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, margin: "-15% 0px" }}
           transition={{ duration: 1.1, ease: EASE_OUT }}
-          className="w-full max-w-5xl rounded-2xl border border-white/10 bg-black/70 p-5 sm:p-8 md:aspect-video"
+          className="w-full max-w-5xl rounded-2xl border border-white/10 bg-black/70 p-5 sm:p-8"
         >
-          <div className="flex h-full flex-col justify-between gap-8">
-            <div className="flex items-start justify-between gap-6">
-              <p className="max-w-xl font-display text-xl font-medium leading-tight tracking-[-0.02em] text-white sm:text-3xl">
-                {p.tagline}
-              </p>
-              <span className="type-label hidden shrink-0 text-grey-1 md:block">{p.slug}.run()</span>
-            </div>
+          <div className="flex flex-col gap-6">
+            <p className="max-w-3xl font-display text-xl font-medium leading-tight tracking-[-0.02em] text-white sm:text-2xl">
+              {p.tagline}
+            </p>
 
-            {/* Pipeline */}
-            <ol className="grid grid-cols-1 gap-2 sm:grid-cols-5 sm:gap-0">
-              {p.pipeline.map((step, s) => (
-                <motion.li
-                  key={step}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.25 + s * 0.08, ease: EASE_OUT }}
-                  className="relative flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3"
-                >
-                  <div className="flex w-full items-center">
-                    <span
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-semibold text-black"
-                      style={{ background: s === p.pipeline.length - 1 ? `linear-gradient(120deg, ${c1}, ${c2})` : "#fff" }}
-                    >
-                      {s + 1}
-                    </span>
-                    {s < p.pipeline.length - 1 && (
-                      <span
-                        aria-hidden
-                        className="ml-2 hidden h-px flex-1 sm:block"
-                        style={{ background: `linear-gradient(90deg, rgba(255,255,255,0.35), ${c2}66)` }}
-                      />
-                    )}
-                  </div>
-                  <span className="pr-3 text-sm text-white/80">{step}</span>
-                </motion.li>
-              ))}
-            </ol>
+            <PipelineWalkthrough project={p} />
 
             <div className="flex flex-wrap gap-2">
               {p.stack.map((t) => (
